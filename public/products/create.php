@@ -37,7 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $isActive = isset($_POST['is_active']) ? 1 : 0;
 
-    if ($productCode === '') {
+    $files = $_FILES['product_images'] ?? null;
+
+    if (
+        empty($_POST)
+        && empty($_FILES)
+        && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0
+    ) {
+        $error = 'Dữ liệu gửi lên quá lớn (vượt post_max_size của PHP).';
+
+    } elseif ($productCode === '') {
         $error = 'Mã sản phẩm không được để trống.';
 
     } elseif ($productName === '') {
@@ -55,47 +64,202 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($supplierID <= 0) {
         $error = 'Vui lòng chọn nhà cung cấp.';
 
+    } elseif (
+        !$files
+        || !isset($files['name'])
+        || !is_array($files['name'])
+    ) {
+        $error = 'Vui lòng chọn ảnh sản phẩm.';
+
     } else {
 
-        $sql = "
-            INSERT INTO products
-            (
-                ProductCode,
-                ProductName,
-                Description,
-                Unit,
-                Price,
-                StockQuantity,
-                IsActive,
-                SupplierID,
-                CategoryID
-            )
-            VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ";
+        $fileCount = count($files['name']);
 
-        $stmt = $conn->prepare($sql);
+        if ($fileCount < 1 || $fileCount > 4) {
 
-        $stmt->bind_param(
-            'ssssdiiii',
-            $productCode,
-            $productName,
-            $description,
-            $unit,
-            $price,
-            $stockQuantity,
-            $isActive,
-            $supplierID,
-            $categoryID
-        );
+            $error = 'Chỉ được chọn từ 1 đến 4 ảnh.';
 
-        if ($stmt->execute()) {
-            header('Location: /products/');
-            exit;
+        } else {
+
+            $maxSize = 2 * 1024 * 1024;
+
+            $extensionMap = [
+                'image/jpeg' => 'jpg',
+                'image/png'  => 'png',
+                'image/webp' => 'webp'
+            ];
+
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $preparedImages = [];
+
+            // Bước 1: kiểm tra TẤT CẢ ảnh trước khi ghi database
+            for ($i = 0; $i < $fileCount; $i++) {
+
+                if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                    $error = 'Có file ảnh upload không thành công.';
+                    break;
+                }
+
+                if ($files['size'][$i] > $maxSize) {
+                    $error = 'Mỗi file ảnh không được vượt quá 2 MB.';
+                    break;
+                }
+
+                $mimeType = $finfo->file($files['tmp_name'][$i]);
+
+                if (!isset($extensionMap[$mimeType])) {
+                    $error = 'Chỉ cho phép file JPG, PNG hoặc WebP.';
+                    break;
+                }
+
+                $extension = $extensionMap[$mimeType];
+
+                $newFileName =
+                    'product-'
+                    . bin2hex(random_bytes(8))
+                    . '.'
+                    . $extension;
+
+                $preparedImages[] = [
+                    'tmp_name'   => $files['tmp_name'][$i],
+                    'file_name'  => $newFileName,
+                    'is_primary' => ($i === 0) ? 1 : 0,
+                    'sort_order' => $i + 1
+                ];
+            }
+
+            // Bước 2: tất cả ảnh hợp lệ → mới bắt đầu transaction
+            if ($error === '') {
+
+                $movedFiles = [];
+
+                try {
+
+                    $conn->begin_transaction();
+
+                    $sql = "
+                        INSERT INTO products
+                        (
+                            ProductCode,
+                            ProductName,
+                            Description,
+                            Unit,
+                            Price,
+                            StockQuantity,
+                            IsActive,
+                            SupplierID,
+                            CategoryID
+                        )
+                        VALUES
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ";
+
+                    $stmt = $conn->prepare($sql);
+
+                    $stmt->bind_param(
+                        'ssssdiiii',
+                        $productCode,
+                        $productName,
+                        $description,
+                        $unit,
+                        $price,
+                        $stockQuantity,
+                        $isActive,
+                        $supplierID,
+                        $categoryID
+                    );
+
+                    if (!$stmt->execute()) {
+                        throw new Exception('Không thể thêm sản phẩm.');
+                    }
+
+                    $productID = $conn->insert_id;
+                    $stmt->close();
+
+                    $sqlImage = "
+                        INSERT INTO product_images
+                        (
+                            ProductID,
+                            ImageFile,
+                            AltText,
+                            IsPrimary,
+                            SortOrder
+                        )
+                        VALUES
+                        (?, ?, ?, ?, ?)
+                    ";
+
+                    $stmtImage = $conn->prepare($sqlImage);
+
+                    foreach ($preparedImages as $index => $image) {
+
+                        $destination =
+                            '/var/www/html/uploads/products/'
+                            . $image['file_name'];
+
+                        if (!move_uploaded_file(
+                            $image['tmp_name'],
+                            $destination
+                        )) {
+                            throw new Exception(
+                                'Không thể lưu một trong các file ảnh.'
+                            );
+                        }
+
+                        $movedFiles[] = $destination;
+
+                        if ($image['is_primary'] === 1) {
+                            $altText = $productName . ' - ảnh chính';
+                        } else {
+                            $altText = $productName . ' - ảnh ' . ($index + 1);
+                        }
+
+                        $imageFile = $image['file_name'];
+                        $isPrimary = $image['is_primary'];
+                        $sortOrder = $image['sort_order'];
+
+                        $stmtImage->bind_param(
+                            'issii',
+                            $productID,
+                            $imageFile,
+                            $altText,
+                            $isPrimary,
+                            $sortOrder
+                        );
+
+                        if (!$stmtImage->execute()) {
+                            throw new Exception(
+                                'Không thể lưu thông tin ảnh.'
+                            );
+                        }
+                    }
+
+                    $stmtImage->close();
+                    $conn->commit();
+
+                    header('Location: /products/');
+                    exit;
+
+                } catch (Throwable $e) {
+
+                    // Hủy thay đổi database
+                    $conn->rollback();
+
+                    // Xóa các file đã lưu vào ổ đĩa
+                    foreach ($movedFiles as $movedFile) {
+                        if (file_exists($movedFile)) {
+                            unlink($movedFile);
+                        }
+                    }
+
+                    if ((int) $e->getCode() === 1062) {
+                        $error = 'Mã sản phẩm đã tồn tại.';
+                    } else {
+                        $error = $e->getMessage();
+                    }
+                }
+            }
         }
-
-        $error = 'Không thể thêm sản phẩm.';
-        $stmt->close();
     }
 }
 
@@ -113,7 +277,7 @@ require_once '/var/www/src/includes/navbar.php';
         </div>
     <?php endif; ?>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
 
         <div class="row g-3">
             <div class="col-md-6">
@@ -214,6 +378,25 @@ require_once '/var/www/src/includes/navbar.php';
                         </option>
                     <?php endwhile; ?>
                 </select>
+            </div>
+
+            <div class="col-12">
+                <label for="productImages" class="form-label">Hình ảnh sản phẩm</label>
+                <input
+                    type="file"
+                    class="form-control"
+                    id="productImages"
+                    name="product_images[]"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    required
+                >
+                <div class="form-text">
+                    Chọn từ 1 đến 4 ảnh.
+                    Chấp nhận JPG, PNG hoặc WebP.
+                    Mỗi ảnh tối đa 2 MB.
+                    Ảnh đầu tiên là ảnh chính.
+                </div>
             </div>
 
             <div class="col-12">
