@@ -32,7 +32,7 @@ $stmt->bind_param(
 
 if ($stmt->execute()) {
 
-    header('Location: /categories/');
+    header('Location: /admin/categories/');
     exit;
 
 } else {
@@ -45,8 +45,8 @@ $stmt->close();
     }
 }
 
-require_once '/var/www/src/includes/header.php';
-require_once '/var/www/src/includes/navbar.php';
+require_once '/var/www/src/includes/admin/header.php';
+require_once '/var/www/src/includes/admin/navbar.php';
 
 ?>
 
@@ -96,7 +96,7 @@ require_once '/var/www/src/includes/navbar.php';
             Lưu
         </button>
 
-        <a href="/categories/" class="btn btn-secondary">
+        <a href="/admin/categories/" class="btn btn-secondary">
             Hủy
         </a>
 
@@ -106,4 +106,4 @@ require_once '/var/www/src/includes/navbar.php';
 
 <?php
 
-require_once '/var/www/src/includes/footer.php';
+require_once '/var/www/src/includes/admin/footer.php';

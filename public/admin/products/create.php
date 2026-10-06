@@ -237,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtImage->close();
                     $conn->commit();
 
-                    header('Location: /products/');
+                    header('Location: /admin/products/');
                     exit;
 
                 } catch (Throwable $e) {
@@ -263,8 +263,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once '/var/www/src/includes/header.php';
-require_once '/var/www/src/includes/navbar.php';
+require_once '/var/www/src/includes/admin/header.php';
+require_once '/var/www/src/includes/admin/navbar.php';
 ?>
 
 <div class="container mt-4">
@@ -418,7 +418,7 @@ require_once '/var/www/src/includes/navbar.php';
 
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Lưu</button>
-            <a href="/products/" class="btn btn-secondary">Hủy</a>
+            <a href="/admin/products/" class="btn btn-secondary">Hủy</a>
         </div>
 
     </form>
@@ -426,6 +426,6 @@ require_once '/var/www/src/includes/navbar.php';
 </div>
 
 <?php
-require_once '/var/www/src/includes/footer.php';
+require_once '/var/www/src/includes/admin/footer.php';
 $conn->close();
 ?>
