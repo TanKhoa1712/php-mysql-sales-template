@@ -31,8 +31,8 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        Đơn hàng
+                    <a class="nav-link" href="/admin/shippers/">
+                        Nhà vận chuyển
                     </a>
                 </li>
 
