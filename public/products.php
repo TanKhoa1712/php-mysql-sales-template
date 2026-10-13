@@ -2,6 +2,105 @@
 
 require_once '/var/www/src/config/database.php';
 
+$sqlCategories = "
+    SELECT
+        CategoryID,
+        CategoryName
+    FROM categories
+    ORDER BY CategoryName
+";
+
+$categoryResult = $conn->query($sqlCategories);
+
+$categories = [];
+
+while ($category = $categoryResult->fetch_assoc()) {
+    $categories[] = $category;
+}
+
+$categoryResult->free();
+
+$categoryID = isset($_GET['category'])
+    ? (int) $_GET['category']
+    : 0;
+
+$keyword = isset($_GET['keyword'])
+    ? trim((string) $_GET['keyword'])
+    : '';
+
+$itemsPerPage = 6;
+
+$page = isset($_GET['page'])
+    ? (int) $_GET['page']
+    : 1;
+
+if ($page < 1) {
+    $page = 1;
+}
+
+$searchKeyword = '%' . $keyword . '%';
+
+$sqlCount = "
+    SELECT
+        COUNT(*) AS TotalProducts
+    FROM
+        products p,
+        categories c
+    WHERE
+        p.CategoryID = c.CategoryID
+        AND p.IsActive = 1
+";
+
+$paramsCount = [];
+$typesCount = '';
+
+if ($categoryID > 0) {
+    $sqlCount .= "
+        AND p.CategoryID = ?
+    ";
+    $typesCount .= 'i';
+    $paramsCount[] = $categoryID;
+}
+
+if ($keyword !== '') {
+    $sqlCount .= "
+        AND (
+            p.ProductName LIKE ?
+            OR p.ProductCode LIKE ?
+        )
+    ";
+    $typesCount .= 'ss';
+    $paramsCount[] = $searchKeyword;
+    $paramsCount[] = $searchKeyword;
+}
+
+$stmtCount = $conn->prepare($sqlCount);
+
+if ($paramsCount !== []) {
+    $stmtCount->bind_param($typesCount, ...$paramsCount);
+}
+
+$stmtCount->execute();
+
+$countResult = $stmtCount->get_result();
+$countRow = $countResult->fetch_assoc();
+
+$totalProducts = (int) ($countRow['TotalProducts'] ?? 0);
+
+$countResult->free();
+$stmtCount->close();
+
+$totalPages = (int) ceil($totalProducts / $itemsPerPage);
+if ($totalPages < 1) {
+    $totalPages = 1;
+}
+
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+
+$offset = ($page - 1) * $itemsPerPage;
+
 $sql = "
     SELECT
         p.ProductID,
@@ -25,18 +124,58 @@ $sql = "
     WHERE
         p.CategoryID = c.CategoryID
         AND p.IsActive = 1
-
-    ORDER BY
-        p.ProductID DESC
 ";
 
-$result = $conn->query($sql);
+$params = [];
+$types = '';
+
+if ($categoryID > 0) {
+    $sql .= "
+        AND p.CategoryID = ?
+    ";
+    $types .= 'i';
+    $params[] = $categoryID;
+}
+
+if ($keyword !== '') {
+    $sql .= "
+        AND (
+            p.ProductName LIKE ?
+            OR p.ProductCode LIKE ?
+        )
+    ";
+    $types .= 'ss';
+    $params[] = $searchKeyword;
+    $params[] = $searchKeyword;
+}
+
+$sql .= "
+    ORDER BY
+        p.ProductID DESC
+    LIMIT ?
+    OFFSET ?
+";
+
+$types .= 'ii';
+$params[] = $itemsPerPage;
+$params[] = $offset;
+
+$stmt = $conn->prepare($sql);
+
+if ($params !== []) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+
+$result = $stmt->get_result();
 
 $pageTitle = 'Sản phẩm';
 
 require_once '/var/www/src/includes/frontend/header.php';
 require_once '/var/www/src/includes/frontend/navbar.php';
 ?>
+
 <main class="container py-5">
 
     <div class="mb-4">
@@ -48,6 +187,101 @@ require_once '/var/www/src/includes/frontend/navbar.php';
         </p>
 
     </div>
+
+    <form
+        method="get"
+        action="/products.php"
+        class="row g-3 mb-4"
+    >
+
+        <div class="col-md-6 col-lg-4">
+
+            <label
+                for="keyword"
+                class="form-label"
+            >
+                Tìm sản phẩm
+            </label>
+
+            <input
+                type="text"
+                name="keyword"
+                id="keyword"
+                class="form-control"
+                value="<?= htmlspecialchars($keyword) ?>"
+                placeholder="Nhập tên hoặc mã sản phẩm"
+            >
+
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+
+            <label
+                for="category"
+                class="form-label"
+            >
+                Danh mục
+            </label>
+
+            <select
+                name="category"
+                id="category"
+                class="form-select"
+            >
+
+                <option value="0">
+                    Tất cả danh mục
+                </option>
+
+                <?php foreach ($categories as $category): ?>
+
+                    <option
+                        value="<?= (int) $category['CategoryID'] ?>"
+                        <?=
+                            $categoryID ===
+                            (int) $category['CategoryID']
+                                ? 'selected'
+                                : ''
+                        ?>
+                    >
+                        <?=
+                            htmlspecialchars(
+                                $category['CategoryName']
+                            )
+                        ?>
+                    </option>
+
+                <?php endforeach; ?>
+
+            </select>
+
+        </div>
+
+        <div class="col-md-auto align-self-end">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Tìm kiếm
+            </button>
+
+            <a
+                href="/products.php"
+                class="btn btn-outline-secondary"
+            >
+                Xóa bộ lọc
+            </a>
+
+        </div>
+
+    </form>
+
+    <p class="text-muted">
+        Tìm thấy
+        <strong><?= $totalProducts ?></strong>
+        sản phẩm.
+    </p>
 
     <?php if ($result->num_rows > 0): ?>
 
@@ -168,10 +402,106 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
     <?php endif; ?>
 
+    <?php if ($totalPages > 1): ?>
+
+        <nav
+            class="mt-5"
+            aria-label="Phân trang sản phẩm"
+        >
+
+            <ul
+                class="pagination
+                       justify-content-center
+                       flex-wrap"
+            >
+
+                <?php
+                $previousQuery = http_build_query([
+                    'keyword' => $keyword,
+                    'category' => $categoryID,
+                    'page' => max(1, $page - 1)
+                ]);
+                ?>
+
+                <li
+                    class="page-item <?=
+                        $page <= 1
+                            ? 'disabled'
+                            : ''
+                    ?>"
+                >
+                    <a
+                        class="page-link"
+                        href="/products.php?<?= $previousQuery ?>"
+                    >
+                        &laquo; Trước
+                    </a>
+                </li>
+
+                <?php for (
+                    $pageNumber = 1;
+                    $pageNumber <= $totalPages;
+                    $pageNumber++
+                ): ?>
+
+                    <?php
+                    $query = http_build_query([
+                        'keyword' => $keyword,
+                        'category' => $categoryID,
+                        'page' => $pageNumber
+                    ]);
+                    ?>
+
+                    <li
+                        class="page-item <?=
+                            $pageNumber === $page
+                                ? 'active'
+                                : ''
+                        ?>"
+                    >
+                        <a
+                            class="page-link"
+                            href="/products.php?<?= $query ?>"
+                        >
+                            <?= $pageNumber ?>
+                        </a>
+                    </li>
+
+                <?php endfor; ?>
+
+                <?php
+                $nextQuery = http_build_query([
+                    'keyword' => $keyword,
+                    'category' => $categoryID,
+                    'page' => min($totalPages, $page + 1)
+                ]);
+                ?>
+
+                <li
+                    class="page-item <?=
+                        $page >= $totalPages
+                            ? 'disabled'
+                            : ''
+                    ?>"
+                >
+                    <a
+                        class="page-link"
+                        href="/products.php?<?= $nextQuery ?>"
+                    >
+                        Sau &raquo;
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    <?php endif; ?>
+
 </main>
 
 <?php
-
 $result->free();
+$stmt->close();
 
 require_once '/var/www/src/includes/frontend/footer.php';
