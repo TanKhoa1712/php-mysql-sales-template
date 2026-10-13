@@ -21,7 +21,11 @@
         >
 
             <ul class="navbar-nav">
-
+                <li class="nav-item">
+                    <a class="nav-link" href="/products.php">
+                        Sản phẩm
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/">
                         Trang chủ
