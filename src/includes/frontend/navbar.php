@@ -1,32 +1,62 @@
-
 <?php
 
-$cartCount = array_sum(
-    $_SESSION['cart'] ?? []
-);
+$cartCount = array_sum($_SESSION['cart'] ?? []);
+$isLoggedIn = isset($_SESSION['customer_id']);
+$customerName = $_SESSION['customer_name'] ?? '';
 
 ?>
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
 
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
     <div class="container">
 
-        <<div class="d-flex gap-2">
+        <div class="d-flex align-items-center gap-2">
 
-    <a
-        class="btn btn-outline-light btn-sm"
-        href="/cart.php"
-    >
-        Giỏ hàng (<?= (int) $cartCount ?>)
-    </a>
+            <a
+                class="btn btn-outline-light btn-sm"
+                href="/cart.php"
+            >
+                Giỏ hàng (<?= (int) $cartCount ?>)
+            </a>
 
-    <a
-        class="btn btn-outline-light btn-sm"
-        href="/admin/"
-    >
-        Quản trị
-    </a>
+            <a
+                class="btn btn-outline-light btn-sm"
+                href="/admin/"
+            >
+                Quản trị
+            </a>
 
-</div>
+            <?php if ($isLoggedIn): ?>
+
+                <span class="text-light">
+                    <?= htmlspecialchars($customerName) ?>
+                </span>
+
+                <a
+                    class="btn btn-outline-light btn-sm"
+                    href="/logout.php"
+                >
+                    Đăng xuất
+                </a>
+
+            <?php else: ?>
+
+                <a
+                    class="btn btn-outline-light btn-sm"
+                    href="/register.php"
+                >
+                    Đăng ký
+                </a>
+
+                <a
+                    class="btn btn-outline-light btn-sm"
+                    href="/login.php"
+                >
+                    Đăng nhập
+                </a>
+
+            <?php endif; ?>
+
+        </div>
 
         <button
             class="navbar-toggler"
@@ -42,7 +72,7 @@ $cartCount = array_sum(
             id="frontendNavbar"
         >
 
-            <ul class="navbar-nav">
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="/products.php">
                         Sản phẩm
@@ -53,11 +83,9 @@ $cartCount = array_sum(
                         Trang chủ
                     </a>
                 </li>
-
             </ul>
 
         </div>
 
     </div>
-
 </nav>

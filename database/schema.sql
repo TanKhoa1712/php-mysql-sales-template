@@ -27,7 +27,10 @@ CREATE TABLE customers (
     City VARCHAR(100),
     PostalCode VARCHAR(20),
     Country VARCHAR(100),
-    Phone VARCHAR(20)
+    Phone VARCHAR(20),
+    Email VARCHAR(255) NULL,
+    PasswordHash VARCHAR(255) NULL,
+    CONSTRAINT uq_customers_email UNIQUE (Email)
 ) CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
@@ -92,7 +95,7 @@ CREATE TABLE orders (
 
     TotalAmount DECIMAL(12,2) NOT NULL DEFAULT 0,
     Status VARCHAR(30) NOT NULL DEFAULT 'Pending',
-    
+
     CustomerID INT NOT NULL,
     EmployeeID INT,
     ShipperID INT NOT NULL,
