@@ -85,6 +85,22 @@ $errorMessage = '';
 $customerName = '';
 $phone = '';
 $address = '';
+$shipperID = 0;
+
+$sqlShippers = "
+    SELECT
+        ShipperID,
+        ShipperName,
+        Phone
+    FROM shippers
+    ORDER BY ShipperID
+";
+
+$shipperResult = $conn->query($sqlShippers);
+$shippers = $shipperResult ? $shipperResult->fetch_all(MYSQLI_ASSOC) : [];
+if ($shipperResult) {
+    $shipperResult->free();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST'
     && isset($_POST['place_order'])) {
@@ -92,18 +108,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     $customerName = trim($_POST['customer_name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $address = trim($_POST['address'] ?? '');
+    $shipperID = (int) ($_POST['shipper_id'] ?? 0);
 
     if ($customerName === ''
         || $phone === ''
-        || $address === '') {
+        || $address === ''
+        || $shipperID <= 0) {
 
         $errorMessage =
-            'Vui lòng nhập đầy đủ thông tin khách hàng.';
+            'Vui lòng nhập đầy đủ thông tin khách hàng và chọn nhà vận chuyển.';
 
     } else {
 
         try {
             $conn->begin_transaction();
+
+            $selectedShipper = null;
+            foreach ($shippers as $shipper) {
+                if ((int) $shipper['ShipperID'] === $shipperID) {
+                    $selectedShipper = $shipper;
+                    break;
+                }
+            }
+
+            if (!$selectedShipper) {
+                throw new Exception('Nhà vận chuyển không hợp lệ.');
+            }
 
             $orderItems = [];
             $orderTotal = 0;
@@ -188,16 +218,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
 
             $sqlOrder = "
                 INSERT INTO orders
-                    (TotalAmount, Status, CustomerID)
-                VALUES (?, ?, ?)
+                    (TotalAmount, Status, CustomerID, ShipperID)
+                VALUES (?, ?, ?, ?)
             ";
 
             $stmtOrder = $conn->prepare($sqlOrder);
             $stmtOrder->bind_param(
-                'dsi',
+                'dsii',
                 $orderTotal,
                 $status,
-                $customerID
+                $customerID,
+                $shipperID
             );
             $stmtOrder->execute();
 
@@ -335,6 +366,31 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                 rows="3"
                                 required
                             ><?= htmlspecialchars($address) ?></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="shipper_id" class="form-label">
+                                Nhà vận chuyển
+                            </label>
+                            <select
+                                class="form-select"
+                                id="shipper_id"
+                                name="shipper_id"
+                                required
+                            >
+                                <option value="">-- Chọn nhà vận chuyển --</option>
+                                <?php foreach ($shippers as $shipper): ?>
+                                    <option
+                                        value="<?= (int) $shipper['ShipperID'] ?>"
+                                        <?= ((int) $shipper['ShipperID'] === $shipperID) ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($shipper['ShipperName']) ?>
+                                        <?php if (!empty($shipper['Phone'])): ?>
+                                            - <?= htmlspecialchars($shipper['Phone']) ?>
+                                        <?php endif; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
                         <button

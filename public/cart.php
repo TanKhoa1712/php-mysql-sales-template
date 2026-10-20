@@ -158,12 +158,14 @@ require_once '/var/www/src/includes/frontend/navbar.php';
             Giỏ hàng của bạn đang trống.
         </div>
 
-        <a
-            href="/products.php"
-            class="btn btn-primary"
-        >
-            Tiếp tục mua hàng
-        </a>
+        <div class="mt-4">
+            <a
+                href="/products.php"
+                class="btn btn-outline-secondary"
+            >
+                Tiếp tục mua hàng
+            </a>
+        </div>
 
     <?php else: ?>
 
@@ -347,30 +349,25 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
             </div>
 
-            <div class="d-flex justify-content-end mt-3">
+            <div class="d-flex justify-content-between align-items-center mt-3">
 
-                <button
-                    type="submit"
-                    name="update_cart"
-                    class="btn btn-primary"
+                <a
+                    href="/products.php"
+                    class="btn btn-outline-secondary"
                 >
-                    Cập nhật giỏ hàng
-                </button>
+                    Tiếp tục mua hàng
+                </a>
+
+                <a
+                    href="/checkout.php"
+                    class="btn btn-success"
+                >
+                    Tiến hành đặt hàng
+                </a>
 
             </div>
 
         </form>
-
-        <div class="mt-4">
-
-            <a
-                href="/products.php"
-                class="btn btn-outline-secondary"
-            >
-                Tiếp tục mua hàng
-            </a>
-
-        </div>
 
     <?php endif; ?>
 
