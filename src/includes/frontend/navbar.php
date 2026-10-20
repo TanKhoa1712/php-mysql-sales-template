@@ -9,54 +9,9 @@ $customerName = $_SESSION['customer_name'] ?? '';
 <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
     <div class="container">
 
-        <div class="d-flex align-items-center gap-2">
-
-            <a
-                class="btn btn-outline-light btn-sm"
-                href="/cart.php"
-            >
-                Giỏ hàng (<?= (int) $cartCount ?>)
-            </a>
-
-            <a
-                class="btn btn-outline-light btn-sm"
-                href="/admin/"
-            >
-                Quản trị
-            </a>
-
-            <?php if ($isLoggedIn): ?>
-
-                <span class="text-light">
-                    <?= htmlspecialchars($customerName) ?>
-                </span>
-
-                <a
-                    class="btn btn-outline-light btn-sm"
-                    href="/logout.php"
-                >
-                    Đăng xuất
-                </a>
-
-            <?php else: ?>
-
-                <a
-                    class="btn btn-outline-light btn-sm"
-                    href="/register.php"
-                >
-                    Đăng ký
-                </a>
-
-                <a
-                    class="btn btn-outline-light btn-sm"
-                    href="/login.php"
-                >
-                    Đăng nhập
-                </a>
-
-            <?php endif; ?>
-
-        </div>
+        <a class="navbar-brand me-3" href="/">
+            Sales Management
+        </a>
 
         <button
             class="navbar-toggler"
@@ -67,12 +22,9 @@ $customerName = $_SESSION['customer_name'] ?? '';
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div
-            class="collapse navbar-collapse"
-            id="frontendNavbar"
-        >
+        <div class="collapse navbar-collapse" id="frontendNavbar">
 
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="/products.php">
                         Sản phẩm
@@ -84,6 +36,55 @@ $customerName = $_SESSION['customer_name'] ?? '';
                     </a>
                 </li>
             </ul>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                <a
+                    class="btn btn-outline-light btn-sm"
+                    href="/cart.php"
+                >
+                    Giỏ hàng (<?= (int) $cartCount ?>)
+                </a>
+
+                <a
+                    class="btn btn-outline-light btn-sm"
+                    href="/admin/"
+                >
+                    Quản trị
+                </a>
+
+                <?php if ($isLoggedIn): ?>
+
+                    <span class="text-light">
+                        <?= htmlspecialchars($customerName) ?>
+                    </span>
+
+                    <a
+                        class="btn btn-outline-light btn-sm"
+                        href="/logout.php"
+                    >
+                        Đăng xuất
+                    </a>
+
+                <?php else: ?>
+
+                    <a
+                        class="btn btn-outline-light btn-sm"
+                        href="/register.php"
+                    >
+                        Đăng ký
+                    </a>
+
+                    <a
+                        class="btn btn-outline-light btn-sm"
+                        href="/login.php"
+                    >
+                        Đăng nhập
+                    </a>
+
+                <?php endif; ?>
+
+            </div>
 
         </div>
 
