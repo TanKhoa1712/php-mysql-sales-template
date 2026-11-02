@@ -4,21 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title><?= htmlspecialchars($pageTitle ?? 'Quản lý bán hàng') ?></title>
+    <meta name="theme-color" content="#126b55">
+    <title><?= htmlspecialchars($pageTitle ?? 'Quản trị hệ thống') ?> | KhoaMart</title>
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
-
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
-    </script>
+    <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
 
-<body>
-
-<div class="p-5 bg-primary text-white text-center">
-    <h1>Hệ thống quản lý bán hàng</h1>
-    <p>Phát triển ứng dụng Web mã nguồn mở</p>
+<body class="admin-ui">
+<div class="admin-context-bar">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+        <span>KHU VỰC QUẢN TRỊ</span>
+        <span><?= htmlspecialchars($pageTitle ?? 'Quản trị hệ thống') ?></span>
+    </div>
 </div>
