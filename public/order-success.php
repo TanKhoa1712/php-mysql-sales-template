@@ -75,19 +75,21 @@ require_once '/var/www/src/includes/frontend/header.php';
 require_once '/var/www/src/includes/frontend/navbar.php';
 ?>
 
-<div class="container py-4">
+<main class="store-main">
+<div class="container py-4 py-lg-5">
 
-    <div class="alert alert-success">
-        <h1 class="h4 mb-2">
-            Đặt hàng thành công
-        </h1>
-        <p class="mb-0">
+    <div class="store-success mb-4">
+        <div class="store-success-icon" aria-hidden="true">✓</div>
+        <p class="section-kicker mb-1">CẢM ƠN BẠN ĐÃ MUA SẮM</p>
+        <h1 class="h3 fw-bold mb-2">Đặt hàng thành công!</h1>
+        <p class="text-muted mb-0">
             Mã đơn hàng của bạn là
             <strong>#<?= (int) $order['OrderID'] ?></strong>.
+            Thông tin đơn hàng được hiển thị bên dưới.
         </p>
     </div>
 
-    <div class="card shadow-sm mb-4">
+    <div class="store-card mb-4">
         <div class="card-body">
             <h2 class="h5 mb-3">Thông tin đơn hàng</h2>
 
@@ -118,13 +120,13 @@ require_once '/var/www/src/includes/frontend/navbar.php';
         </div>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="store-card">
         <div class="card-body">
 
             <h2 class="h5 mb-3">Chi tiết sản phẩm</h2>
 
             <div class="table-responsive">
-                <table class="table align-middle">
+                <table class="table store-table align-middle">
                     <thead>
                         <tr>
                             <th>Mã SP</th>
@@ -185,12 +187,13 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
             <a
                 href="/products.php"
-                class="btn btn-primary"
+                class="btn btn-store-primary px-4"
             >
                 Tiếp tục mua hàng
             </a>
 
         </div>
+        </main>
     </div>
 
 </div>

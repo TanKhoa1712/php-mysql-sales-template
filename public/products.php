@@ -176,22 +176,22 @@ require_once '/var/www/src/includes/frontend/header.php';
 require_once '/var/www/src/includes/frontend/navbar.php';
 ?>
 
-<main class="container py-5">
-
-    <div class="mb-4">
-
-        <h1>Sản phẩm</h1>
-
-        <p class="text-muted">
-            Khám phá các sản phẩm hiện có tại cửa hàng.
-        </p>
-
-    </div>
+<main class="store-main">
+    <div class="container py-4 py-lg-5">
+        <div class="store-page-heading">
+            <div>
+                <p class="section-kicker mb-1">KHÁM PHÁ KHO HÀNG</p>
+                <h1 class="h2 mb-2">Tất cả sản phẩm</h1>
+                <p class="text-muted mb-0">
+                    Tìm lựa chọn phù hợp từ các danh mục đang có tại cửa hàng.
+                </p>
+            </div>
+        </div>
 
     <form
         method="get"
         action="/products.php"
-        class="row g-3 mb-4"
+        class="store-panel row g-3 align-items-end mb-4"
     >
 
         <div class="col-md-6 col-lg-4">
@@ -257,11 +257,11 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
         </div>
 
-        <div class="col-md-auto align-self-end">
+        <div class="col-md-auto">
 
             <button
                 type="submit"
-                class="btn btn-primary"
+                class="btn btn-store-primary px-4"
             >
                 Tìm kiếm
             </button>
@@ -277,31 +277,26 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
     </form>
 
-    <p class="text-muted">
-        Tìm thấy
-        <strong><?= $totalProducts ?></strong>
-        sản phẩm.
-    </p>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <p class="text-muted small mb-0">
+            Tìm thấy <strong><?= $totalProducts ?></strong> sản phẩm
+            <?= $keyword !== '' ? 'cho “' . htmlspecialchars($keyword) . '”' : '' ?>.
+        </p>
+    </div>
 
     <?php if ($result->num_rows > 0): ?>
 
-        <div class="row g-4">
+        <div class="row g-3 g-lg-4">
 
             <?php while ($product = $result->fetch_assoc()): ?>
 
-                <div class="col-md-6 col-lg-4">
+                <div class="col-6 col-lg-4">
 
-                    <div class="card h-100">
+                    <article class="card product-card h-100">
 
                         <?php if (!empty($product['ImageFile'])): ?>
 
-                            <div
-                                class="bg-light d-flex
-                                       align-items-center
-                                       justify-content-center
-                                       p-3"
-                                style="height: 260px;"
-                            >
+                            <a class="product-image-wrap" href="/product-detail.php?id=<?= (int) $product['ProductID'] ?>">
 
                                 <img
                                     src="/uploads/products/<?=
@@ -314,57 +309,53 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                             $product['ProductName']
                                         )
                                     ?>"
-                                    style="
-                                        width: 100%;
-                                        height: 100%;
-                                        object-fit: contain;
-                                    "
+                                    loading="lazy"
+                                    onerror="this.parentElement.classList.add('is-image-missing'); this.remove();"
                                 >
+                                <span class="product-image-placeholder">Chưa có hình ảnh</span>
+                                <span class="product-image-badge">Sản phẩm</span>
 
-                            </div>
+                            </a>
 
                         <?php else: ?>
 
-                            <div
-                                class="bg-light d-flex
-                                       align-items-center
-                                       justify-content-center
-                                       text-muted"
-                                style="height: 260px;"
-                            >
-                                Chưa có hình ảnh
-                            </div>
+                            <a class="product-image-wrap is-image-missing" href="/product-detail.php?id=<?= (int) $product['ProductID'] ?>">
+                                <span class="product-image-placeholder">Chưa có hình ảnh</span>
+                            </a>
 
                         <?php endif; ?>
 
                         <div class="card-body d-flex flex-column">
 
-                            <p class="text-muted small mb-1">
+                            <span class="product-category">
                                 <?=
                                     htmlspecialchars(
                                         $product['CategoryName']
                                     )
                                 ?>
-                            </p>
+                            </span>
 
-                            <h5 class="card-title">
+                            <h2 class="product-name">
+                                <a href="/product-detail.php?id=<?= (int) $product['ProductID'] ?>">
                                 <?=
                                     htmlspecialchars(
                                         $product['ProductName']
                                     )
                                 ?>
-                            </h5>
+                                </a>
+                            </h2>
 
-                            <p class="text-muted small">
-                                Mã sản phẩm:
+                            <span class="product-code">
+                                Mã
                                 <?=
                                     htmlspecialchars(
                                         $product['ProductCode']
                                     )
                                 ?>
-                            </p>
+                            </span>
 
-                            <p class="fw-bold fs-5 mb-3">
+                            <div class="mt-auto pt-3 d-flex align-items-center justify-content-between gap-2">
+                                <strong class="product-price">
                                 <?=
                                     number_format(
                                         (float) $product['Price'],
@@ -373,20 +364,17 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                         '.'
                                     )
                                 ?> đ
-                            </p>
-
-                            <a
-                                href="/product-detail.php?id=<?=
-                                    (int) $product['ProductID']
-                                ?>"
-                                class="btn btn-outline-primary mt-auto"
-                            >
-                                Xem chi tiết
-                            </a>
+                                </strong>
+                                <a
+                                    href="/product-detail.php?id=<?= (int) $product['ProductID'] ?>"
+                                    class="product-quick-link"
+                                    aria-label="Xem chi tiết <?= htmlspecialchars($product['ProductName']) ?>"
+                                >+</a>
+                            </div>
 
                         </div>
 
-                    </div>
+                    </article>
 
                 </div>
 
@@ -396,8 +384,13 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
     <?php else: ?>
 
-        <div class="alert alert-info">
-            Hiện chưa có sản phẩm nào để hiển thị.
+        <div class="store-empty">
+            <div class="store-empty-mark" aria-hidden="true">⌕</div>
+            <h2 class="h5">Chưa tìm thấy sản phẩm phù hợp</h2>
+            <p class="text-muted mb-3">
+                Thử từ khóa khác hoặc xóa bộ lọc để xem toàn bộ sản phẩm.
+            </p>
+            <a href="/products.php" class="btn btn-store-primary px-4">Xem tất cả sản phẩm</a>
         </div>
 
     <?php endif; ?>
@@ -498,6 +491,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
     <?php endif; ?>
 
+    </div>
 </main>
 
 <?php

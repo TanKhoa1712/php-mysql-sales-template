@@ -130,15 +130,18 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
 ?>
 
-<div class="container py-4">
+<main class="store-main">
+<div class="container py-4 py-lg-5">
 
     <div class="row justify-content-center">
 
-        <div class="col-md-7 col-lg-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="store-auth-card">
+            <div class="store-auth-form">
 
-            <h1 class="h3 mb-4">
-                Đăng ký tài khoản
-            </h1>
+            <p class="section-kicker mb-1">THAM GIA CÙNG CHÚNG TÔI</p>
+            <h1 class="h3 fw-bold mb-2">Tạo tài khoản</h1>
+            <p class="text-muted mb-4">Đăng ký để lưu thông tin và đặt hàng thuận tiện hơn.</p>
 
             <?php if ($errorMessage !== ''): ?>
 
@@ -241,16 +244,24 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
                 <button
                     type="submit"
-                    class="btn btn-primary"
+                    class="btn btn-store-primary w-100 py-2"
                 >
                     Đăng ký
                 </button>
 
             </form>
 
+            <p class="text-center text-muted small mt-4 mb-0">
+                Đã có tài khoản?
+                <a class="section-link" href="/login.php">Đăng nhập</a>
+            </p>
+
+            </div>
+            </div>
         </div>
 
     </div>
+    </main>
 
 </div>
 

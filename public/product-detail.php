@@ -138,15 +138,16 @@ $pageTitle = $product['ProductName'];
 require_once '/var/www/src/includes/frontend/header.php';
 require_once '/var/www/src/includes/frontend/navbar.php';
 ?>
-<main class="container py-5">
+<main class="store-main">
+    <div class="container py-4 py-lg-5">
 
     <div class="mb-4">
 
         <a
             href="/products.php"
-            class="text-decoration-none"
+            class="section-link"
         >
-            &larr; Quay lại danh sách sản phẩm
+            <span aria-hidden="true">←</span> Quay lại danh sách sản phẩm
         </a>
 
     </div>
@@ -157,13 +158,8 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
             <?php if (!empty($images)): ?>
 
-                <div
-                    class="bg-light d-flex
-                           align-items-center
-                           justify-content-center
-                           p-3 mb-3"
-                    style="height: 420px;"
-                >
+                <div class="store-details-image mb-3">
+                    <span class="product-image-placeholder">Chưa có hình ảnh</span>
 
                     <img
                         src="/uploads/products/<?=
@@ -171,16 +167,12 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                 $images[0]['ImageFile']
                             )
                         ?>"
+                        onerror="this.parentElement.classList.add('is-image-missing'); this.remove();"
                         alt="<?=
                             htmlspecialchars(
                                 $product['ProductName']
                             )
                         ?>"
-                        style="
-                            width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                        "
                     >
 
                 </div>
@@ -214,11 +206,9 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                                 $product['ProductName']
                                             )
                                         ?>"
-                                        style="
-                                            width: 100%;
-                                            height: 100%;
-                                            object-fit: contain;
-                                        "
+                                        loading="lazy"
+                                        onerror="this.closest('.col-4').remove();"
+                                        style="width: 100%; height: 100%; object-fit: contain;"
                                     >
 
                                 </div>
@@ -234,13 +224,14 @@ require_once '/var/www/src/includes/frontend/navbar.php';
             <?php else: ?>
 
                 <div
-                    class="bg-light d-flex
+                    class="store-details-image is-image-missing
+                           bg-light d-flex
                            align-items-center
                            justify-content-center
                            text-muted"
-                    style="height: 420px;"
+                    style="min-height: 400px;"
                 >
-                    Chưa có hình ảnh
+                    <span class="product-image-placeholder">Chưa có hình ảnh</span>
                 </div>
 
             <?php endif; ?>
@@ -248,8 +239,9 @@ require_once '/var/www/src/includes/frontend/navbar.php';
         </div>
 
         <div class="col-lg-6">
+            <div class="store-detail-content h-100">
 
-            <p class="text-muted mb-2">
+            <p class="section-kicker mb-2">
                 <?=
                     htmlspecialchars(
                         $product['CategoryName']
@@ -257,7 +249,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                 ?>
             </p>
 
-            <h1 class="mb-3">
+            <h1 class="h2 fw-bold mb-3">
                 <?=
                     htmlspecialchars(
                         $product['ProductName']
@@ -274,7 +266,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                 ?>
             </p>
 
-            <p class="fs-3 fw-bold">
+            <p class="store-detail-price mb-3">
                 <?=
                     number_format(
                         (float) $product['Price'],
@@ -285,11 +277,11 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                 ?> đ
             </p>
 
-            <hr>
+            <hr class="my-4">
 
             <dl class="row">
 
-                <dt class="col-sm-4">
+                <dt class="col-sm-4 text-muted fw-normal">
                     Danh mục
                 </dt>
 
@@ -301,7 +293,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                     ?>
                 </dd>
 
-                <dt class="col-sm-4">
+                <dt class="col-sm-4 text-muted fw-normal">
                     Nhà cung cấp
                 </dt>
 
@@ -313,7 +305,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                     ?>
                 </dd>
 
-                <dt class="col-sm-4">
+                <dt class="col-sm-4 text-muted fw-normal">
                     Đơn vị tính
                 </dt>
 
@@ -325,12 +317,16 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                     ?>
                 </dd>
 
-                <dt class="col-sm-4">
+                <dt class="col-sm-4 text-muted fw-normal">
                     Tồn kho
                 </dt>
 
                 <dd class="col-sm-8">
-                    <?= (int) $product['StockQuantity'] ?>
+                    <span class="store-stock">
+                        <?= (int) $product['StockQuantity'] > 0
+                            ? 'Còn ' . (int) $product['StockQuantity'] . ' sản phẩm'
+                            : 'Tạm hết hàng' ?>
+                    </span>
                 </dd>
 
             </dl>
@@ -365,7 +361,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                 value="1"
                                 min="1"
                                 max="<?= (int) $product['StockQuantity'] ?>"
-                                style="width: 100px;"
+                                style="width: 105px;"
                             >
 
                         </div>
@@ -375,7 +371,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                             <button
                                 type="submit"
                                 name="add_to_cart"
-                                class="btn btn-primary"
+                                class="btn btn-store-primary px-4"
                             >
                                 Thêm vào giỏ hàng
                             </button>
@@ -397,7 +393,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
                 <hr>
 
-                <h5>Mô tả sản phẩm</h5>
+                <h2 class="h5 fw-bold">Mô tả sản phẩm</h2>
 
                 <p>
                     <?=
@@ -411,10 +407,12 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
             <?php endif; ?>
 
+            </div>
         </div>
 
     </div>
 
+    </div>
 </main>
 
 <?php

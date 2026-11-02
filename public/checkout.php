@@ -445,9 +445,21 @@ require_once '/var/www/src/includes/frontend/header.php';
 require_once '/var/www/src/includes/frontend/navbar.php';
 ?>
 
-<div class="container py-4">
+<main class="store-main">
+<div class="container py-4 py-lg-5">
 
-    <h1 class="h3 mb-4">Đặt hàng</h1>
+    <div class="store-page-heading">
+        <div>
+            <p class="section-kicker mb-1">GẦN HOÀN TẤT</p>
+            <h1 class="h2 mb-2">Thông tin đặt hàng</h1>
+            <p class="text-muted mb-0">Điền thông tin nhận hàng và xác nhận đơn hàng của bạn.</p>
+        </div>
+    </div>
+
+    <div class="checkout-step">
+        <span>1</span> Thông tin giao hàng
+        <span>2</span> Xác nhận đơn hàng
+    </div>
 
     <?php if ($errorMessage !== ''): ?>
         <div class="alert alert-danger">
@@ -458,7 +470,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
     <div class="row g-4">
 
         <div class="col-lg-7">
-            <div class="card shadow-sm">
+            <div class="store-card">
                 <div class="card-body">
 
                     <h2 class="h5 mb-3">
@@ -579,7 +591,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                         <button
                             type="submit"
                             name="place_order"
-                            class="btn btn-success"
+                            class="btn btn-store-primary px-4"
                         >
                             Xác nhận đặt hàng
                         </button>
@@ -591,7 +603,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
         </div>
 
         <div class="col-lg-5">
-            <div class="card shadow-sm">
+            <div class="store-card store-summary">
                 <div class="card-body">
 
                     <h2 class="h5 mb-3">
@@ -632,15 +644,9 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                         </div>
                     <?php endforeach; ?>
 
-                    <div
-                        class="d-flex
-                               justify-content-between
-                               fw-bold
-                               fs-5
-                               pt-3"
-                    >
+                    <div class="d-flex justify-content-between gap-3 fw-bold pt-3">
                         <span>Tổng cộng</span>
-                        <span>
+                        <span class="store-summary-total">
                             <?= number_format(
                                 (float) $total,
                                 0,
@@ -649,6 +655,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                             ) ?> đ
                         </span>
                     </div>
+                    </main>
 
                     <a
                         href="/cart.php"

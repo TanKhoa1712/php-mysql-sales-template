@@ -6,87 +6,29 @@ $customerName = $_SESSION['customer_name'] ?? '';
 
 ?>
 
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
-    <div class="container">
-
-        <a class="navbar-brand me-3" href="/">
-            Sales Management
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container store-navbar-wrap">
+        <a class="navbar-brand store-brand" href="/" aria-label="KhoaMart - Trang chủ">
+            <span class="brand-mark" aria-hidden="true">K</span>
+            <span class="brand-name">Khoa<span>Mart</span><small>MUA SẮM THÔNG MINH</small></span>
         </a>
 
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#frontendNavbar"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="frontendNavbar">
-
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/products.php">
-                        Sản phẩm
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/">
-                        Trang chủ
-                    </a>
-                </li>
-            </ul>
-
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-
-                <a
-                    class="btn btn-outline-light btn-sm"
-                    href="/cart.php"
-                >
-                    Giỏ hàng (<?= (int) $cartCount ?>)
-                </a>
-
-                <a
-                    class="btn btn-outline-light btn-sm"
-                    href="/admin/"
-                >
-                    Quản trị
-                </a>
-
-                <?php if ($isLoggedIn): ?>
-
-                    <span class="text-light">
-                        <?= htmlspecialchars($customerName) ?>
-                    </span>
-
-                    <a
-                        class="btn btn-outline-light btn-sm"
-                        href="/logout.php"
-                    >
-                        Đăng xuất
-                    </a>
-
-                <?php else: ?>
-
-                    <a
-                        class="btn btn-outline-light btn-sm"
-                        href="/register.php"
-                    >
-                        Đăng ký
-                    </a>
-
-                    <a
-                        class="btn btn-outline-light btn-sm"
-                        href="/login.php"
-                    >
-                        Đăng nhập
-                    </a>
-
-                <?php endif; ?>
-
-            </div>
-
+        <div class="store-account-shortcuts">
+            <?php if ($isLoggedIn): ?>
+                <span class="store-customer">Xin chào, <?= htmlspecialchars($customerName) ?></span>
+                <a class="store-login-shortcut" href="/logout.php">Đăng xuất</a>
+            <?php else: ?>
+                <a class="store-login-shortcut" href="/login.php">Đăng nhập</a>
+                <a class="store-register-shortcut" href="/register.php">Đăng ký</a>
+            <?php endif; ?>
         </div>
 
+    </div>
+    <div class="store-category-nav">
+        <div class="container d-flex align-items-center gap-4">
+            <a href="/">Trang chủ</a>
+            <a href="/products.php">Tất cả sản phẩm</a>
+            <span class="ms-auto d-none d-lg-inline">Giá tốt · Chọn nhanh · Đặt hàng tiện lợi</span>
+        </div>
     </div>
 </nav>

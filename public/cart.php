@@ -140,40 +140,34 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
 ?>
 
-<main class="container py-5">
+<main class="store-main">
+    <div class="container py-4 py-lg-5">
 
-    <div class="mb-4">
-
-        <h1>Giỏ hàng</h1>
-
-        <p class="text-muted">
-            Các sản phẩm bạn đã chọn.
-        </p>
-
+    <div class="store-page-heading">
+        <div>
+            <p class="section-kicker mb-1">KIỂM TRA LỰA CHỌN</p>
+            <h1 class="h2 mb-2">Giỏ hàng của bạn</h1>
+            <p class="text-muted mb-0">Xem lại sản phẩm và số lượng trước khi đặt hàng.</p>
+        </div>
     </div>
 
     <?php if (empty($cartItems)): ?>
 
-        <div class="alert alert-info">
-            Giỏ hàng của bạn đang trống.
-        </div>
-
-        <div class="mt-4">
-            <a
-                href="/products.php"
-                class="btn btn-outline-secondary"
-            >
-                Tiếp tục mua hàng
-            </a>
+        <div class="store-empty">
+            <div class="store-empty-mark" aria-hidden="true">▱</div>
+            <h2 class="h5">Giỏ hàng đang trống</h2>
+            <p class="text-muted mb-3">Hãy khám phá sản phẩm và thêm món bạn yêu thích vào giỏ.</p>
+            <a href="/products.php" class="btn btn-store-primary px-4">Khám phá sản phẩm</a>
         </div>
 
     <?php else: ?>
 
         <form method="post" action="/cart.php">
 
+            <div class="store-panel p-0 mb-4">
             <div class="table-responsive">
 
-                <table class="table align-middle">
+                <table class="table store-table align-middle">
 
                     <thead>
 
@@ -214,11 +208,9 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                                                         $item['ProductName']
                                                     )
                                                 ?>"
-                                                style="
-                                                    width: 80px;
-                                                    height: 80px;
-                                                    object-fit: contain;
-                                                "
+                                                class="store-cart-image"
+                                                loading="lazy"
+                                                onerror="this.remove();"
                                             >
 
                                         <?php endif; ?>
@@ -348,8 +340,9 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                 </table>
 
             </div>
+            </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3">
 
                 <a
                     href="/products.php"
@@ -362,14 +355,14 @@ require_once '/var/www/src/includes/frontend/navbar.php';
                     <button
                         type="submit"
                         name="update_cart"
-                        class="btn btn-primary"
+                        class="btn btn-outline-success"
                     >
                         Cập nhật giỏ hàng
                     </button>
 
                     <a
                         href="/checkout.php"
-                        class="btn btn-success"
+                        class="btn btn-store-primary"
                     >
                         Tiến hành đặt hàng
                     </a>
@@ -381,6 +374,7 @@ require_once '/var/www/src/includes/frontend/navbar.php';
 
     <?php endif; ?>
 
+    </div>
 </main>
 
 <?php
